@@ -1,37 +1,68 @@
 var gulp = require( 'gulp' ),
     server = require( 'gulp-develop-server' ),
     livereload = require( 'gulp-livereload' ),
-    webpack = require('gulp-webpack');
+    webpack = require('webpack'),
+    webpackStream = require('webpack-stream'),
+    reload = require('gulp-hot-reload'),
+    gutil = require('gulp-util'),
+    path = require('path')
 
-// translate (bable) and bundle all the js files to one file
-gulp.task('webpack', function() {
-    return gulp.src('components/main.jsx')
-      .pipe(webpack(  require('./webpack.config.js')  ))
-      .pipe(gulp.dest('./public/'));
-});
+// report the stats after the build is done
+const buildDone = (err, stats) => {
+  if(err) throw new gutil.PluginError("webpack", err);
+  gutil.log('[webpack]', stats.toString({
+    colors: true,
+    chunkModules: false,
+    assets: false,
+    version: false,
+    hash: false
+  }))
+}
 
-// files that tell livereload to restart the server
-var serverFiles = [
-  './server.js',
-  './controllers/*.js'
-];
-// server options
-var options = {
-  path: './server.js'
-};
-// start the server
-gulp.task( 'server:start', function() {
-    server.listen( options, livereload.listen );
-});
+// get config files
+var serverConfig = require('./webpack.server.config.js')
+var frontendConfig = require('./webpack.config.js')
 
-// If server scripts change, restart the server and then livereload.
-gulp.task( 'default', [ 'webpack', 'server:start' ], function() {
+// builds the backend files - what about my jsx?
+gulp.task('build-backend', () => {
+    gulp.src('./server.js')
+      .pipe(webpackStream(serverConfig, webpack, buildDone))
+      .pipe(reload({
+        port: 1337,
+        react: true,
+        config: path.join(__dirname, 'webpack.config.js')
+    }))
+})
 
-    function restart( file ) {
-        server.changed( function( error ) {
-            if( ! error ) livereload.changed( file.path );
-        });
-    }
+// watch for changes on the js, build the server
+gulp.task('watch', function () {
+  gulp.watch('src/**/*.js', ['build-backend'])
+})
 
-    gulp.watch( serverFiles ).on( 'change', restart );
-});
+// distribute backend
+gulp.task('dist-backend', function () {
+  process.env.NODE_ENV = 'production'
+  gulp
+    .src('./src/server.js')
+    .pipe(webpackStream(serverConfig, webpack, buildDone))
+    .pipe(gulp.dest('build'))
+})
+
+// distribute frontend
+gulp.task('dist-frontend', function () {
+  process.env.NODE_ENV = 'production'
+  gulp
+    .src('./src/application.js')
+    .pipe(webpackStream(frontendConfig, webpack, buildDone))
+    .pipe(gulp.dest('build/static'))
+})
+
+//for production only: use to build your distribiution packages
+gulp.task('dist', ['dist-backend', 'dist-frontend'], function() {
+
+})
+
+// run default
+gulp.task('default', ['build-backend', 'watch'], function () {
+  gutil.log('watch')
+})

@@ -1,20 +1,24 @@
+var path = require('path'),
+  HTMLWebpackPlugin = require('html-webpack-plugin')
+
 module.exports = {
+  devtool: 'eval',
   entry: [
-    './components/main.jsx'
+    './src/components/main.jsx'
   ],
   output: {
-    path: __dirname,
-    publicPath: '/public/',
-    filename: 'bundle.js'
+    path: path.join(__dirname, 'build', 'static'),
+    filename: 'application.js',
+    publicPath: '/'
   },
+  plugins: [
+    new HTMLWebpackPlugin({title: 'Hot Reload'})
+  ],
   module: {
     loaders: [{
-      test: /\.jsx$/,
-      exclude: /(node_modules|bower_components)/,
-      loader: 'babel',
-      query: {
-        presets: ['es2015', 'react']
-      }
+      test: /\.jsx?$/,
+      loaders: ['babel'],
+      exclude: /node_modules/
     }]
   },
   resolve: {
