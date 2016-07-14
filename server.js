@@ -6,13 +6,13 @@ var mustache = require('mustache-express');
 
 
 // get the controlling routers
-var controllers = require('./controllers/index');
+var controllers = require('./app/controllers/index');
 
 // get the routes
 app.use('/', controllers);
 
 // pass the static files into a /static diectory
-app.use('/static', express.static('./public/'));
+//app.use('/static', express.static('./public/'));
 
 //set template angines and view routes
 app.set('views', __dirname + '/views');
