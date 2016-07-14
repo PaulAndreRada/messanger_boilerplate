@@ -1,79 +1,37 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const merge = require('webpack-merge');
-const validate = require('webpack-validator');
+var webpack = require('webpack');
 
-// plugin configs
-const parts = require('./libs/parts');
-
-const PATHS = {
-  app: path.join(__dirname, 'app'),
-  build: path.join(__dirname, 'build')
-};
-
-const common = {
-  entry: {
-    style: PATHS.style,
-    app: PATHS.app
-  },
-  output: {
-    path: PATHS.build,
-    filename: '[name].js'
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      title: 'Webpack demo'
-    })
+module.exports = {
+  context: __dirname,
+  entry: [
+    // Add the client which connects to our middleware
+    // You can use full urls like 'webpack-hot-middleware/client?path=http://localhost:3000/__webpack_hmr'
+    // useful if you run your app from another point like django
+    'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
+    // And then the actual application
+    './app/index.jsx'
   ],
+
+  output: {
+    path: __dirname,
+    publicPath: '/build/',
+    filename: 'bundle.js'
+  },
+  module: {
+    loaders: [{
+      test: /\.jsx$/,
+      exclude: /(node_modules|bower_components)/,
+      loader: 'babel',
+      query: {
+        presets: ['es2015', 'react']
+      }
+    }]
+  },
   resolve: {
     extensions: ['', '.js', '.jsx']
-  }
+  },
+  plugins: [
+    new webpack.optimize.OccurenceOrderPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoErrorsPlugin()
+  ],
 };
-
-var config;
-
-// Detect how npm is run and branch based on that
-switch(process.env.npm_lifecycle_event) {
-  case 'build':
-
-    config = merge(
-      common,
-      {
-        devtool: 'source-map',
-        output: {
-          path: PATHS.build,
-          filename: '[name].[chunkhash].js',
-          // This is used for require.ensure.
-          // The setup will work without but this is useful to set.
-          chunkFilename: '[chunkhash].js'
-        }
-      },
-      parts.jsxLoader(PATHS.app),
-      parts.clean(PATHS.build),
-      parts.setFreeVariable(
-        'process.env.NODE_ENV',
-        'production'
-      ),
-      parts.extractBundle({
-        name: 'vendor',
-        entries: ['react']
-      }),
-      parts.minify()
-    );
-    break;
-  default:
-    config = merge(
-      common,
-
-      {
-        devtool: 'eval-source-map'
-      },
-      parts.devServer({
-        //customize host/port here if needed
-        host: process.env.HOST,
-        port: process.env.PORT
-      })
-    );
-}
-
-module.exports = validate(config);

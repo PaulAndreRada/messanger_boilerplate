@@ -3,10 +3,12 @@ var gulp = require( 'gulp' ),
     livereload = require( 'gulp-livereload' ),
     webpack = require('webpack-stream');
 
+// translate (bable) and bundle all the js files to one file
+// the same config file is used by hot reload
 gulp.task('webpack', function() {
-  return gulp.src('src/components/main.js')
-    .pipe(webpack( require('./webpack.config.js') ))
-    .pipe(gulp.dest('dist/'));
+  return gulp.src('app/main.jsx')
+    .pipe(webpack(  require('./webpack.config.js')  ))
+    .pipe(gulp.dest('./build/'));
 });
 
 // files that tell livereload to restart the server
@@ -23,7 +25,7 @@ gulp.task( 'server:start', function() {
 });
 
 // If server scripts change, restart the server and then livereload.
-gulp.task( 'default', [ 'server:start' ], function() {
+gulp.task( 'default', [ 'webpack','server:start' ], function() {
 
     function restart( file ) {
         server.changed( function( error ) {
