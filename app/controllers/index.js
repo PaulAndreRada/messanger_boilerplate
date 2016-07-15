@@ -7,9 +7,7 @@ router.get('/', function(req, res) {
   res.render('index');
 });
 
-// define the about route
-router.get('/register', function(req, res) {
-  res.render('register');
-});
+
+// define 404s, 400s, and 500s
 
 module.exports = router;

@@ -1,13 +1,14 @@
 import React, {Component} from 'react'
 import ReactDOM from 'react-dom'
-import './stylesheets/main'
+
+import DefaultLayout from './layouts/default-layout'
 
 class App extends Component {
   render(){
     return(
-      <div>
-        YOLA! clean the setup code and add scss
-      </div>
+        <DefaultLayout>
+          I'm inside you...layout
+        </DefaultLayout>
     );
   }
 }
