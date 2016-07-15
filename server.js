@@ -4,18 +4,21 @@ var http = require('http').createServer(app);
 var port = process.env.PORT || 3000;
 var mustache = require('mustache-express');
 
+// middleware
+var hotReload = require("./app/controllers/hot-reload-middleware");
 
 // get the controlling routers
-var controllers = require('./controllers/index');
+var controllers = require('./app/controllers/index');
 
 // get the routes
 app.use('/', controllers);
 
-// pass the static files into a /static diectory
-app.use('/static', express.static('./public/'));
+if(process.env.ENV_VARIABLE = "development"){
+  hotReload(app);
+}
 
 //set template angines and view routes
-app.set('views', __dirname + '/views');
+app.set('views', __dirname + '/app/views');
 app.engine('mustache', mustache());
 app.set('view engine', 'mustache');
 
