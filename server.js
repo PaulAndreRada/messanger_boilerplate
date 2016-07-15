@@ -10,7 +10,7 @@ var hotReload = require("./app/controllers/hot-reload-middleware");
 // get the controlling routers
 var controllers = require('./app/controllers/index');
 
-// get the routes
+// use the router for any routes after /
 app.use('/', controllers);
 
 if(process.env.ENV_VARIABLE = "development"){

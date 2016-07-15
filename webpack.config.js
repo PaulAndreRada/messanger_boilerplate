@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 const PATHS = {
-  app: path.join(__dirname, 'app'),
+  app: path.join(__dirname, 'app', 'pages'),
   style: path.join(__dirname, 'app', 'stylesheets')
 }
 
