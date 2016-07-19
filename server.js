@@ -13,11 +13,12 @@ var controllers = require('./app/controllers/index');
 // use the router for any routes after /
 app.use('/', controllers);
 
+// turn on hot reload (HMR) if in dev mode
 if(process.env.ENV_VARIABLE = "development"){
   hotReload(app);
 }
 
-//set template angines and view routes
+// set template angines and view routes
 app.set('views', __dirname + '/app/views');
 app.engine('mustache', mustache());
 app.set('view engine', 'mustache');
